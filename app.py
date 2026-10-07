@@ -1,4 +1,4 @@
-python
+import streamlit como calle
 import streamlit as st
 import pandas as pd
 
