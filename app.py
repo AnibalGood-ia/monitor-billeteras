@@ -1,6 +1,7 @@
 import streamlit as st
-import streamlit as st
 import pandas as pd
+import json
+import requests
 
 # Configuración de la página móvil
 st.set_page_config(page_title="Monitor Rendimientos AR", page_icon="💰", layout="centered")
@@ -20,13 +21,20 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Datos simulación del mercado
-datos_billeteras = [
-    {"Billetera": "Naranja X", "TNA": 42.0, "Monto Máximo con Tasa": "Hasta $600.000"},
-    {"Billetera": "Personal Pay (Nivel 3)", "TNA": 39.5, "Monto Máximo con Tasa": "Sin límite"},
-    {"Billetera": "Mercado Pago", "TNA": 37.2, "Monto Máximo con Tasa": "Sin límite"},
-    {"Billetera": "Ualá (Uilo)", "TNA": 36.0, "Monto Máximo con Tasa": "Sin límite"},
-]
+# Cargar datos desde GitHub de forma segura para evitar bloqueos
+try:
+    # URL raw para leer el archivo tasas.json de tu propio repositorio
+    url = "https://githubusercontent.com"
+    response = requests.get(url)
+    datos_billeteras = response.json()
+except Exception:
+    # Datos de respaldo por si falla la conexión momentáneamente
+    datos_billeteras = [
+        {"Billetera": "Naranja X", "TNA": 42.0, "Monto Máximo con Tasa": "Hasta $600.000"},
+        {"Billetera": "Personal Pay (Nivel 3)", "TNA": 39.5, "Monto Máximo con Tasa": "Sin límite"},
+        {"Billetera": "Mercado Pago", "TNA": 37.2, "Monto Máximo con Tasa": "Sin límite"},
+        {"Billetera": "Ualá (Uilo)", "TNA": 36.0, "Monto Máximo con Tasa": "Sin límite"}
+    ]
 
 df = pd.DataFrame(datos_billeteras)
 
@@ -45,7 +53,6 @@ monto = st.number_input("Ingresá cuántos pesos querés depositar ($):", min_va
 if monto > 0:
     resultados = []
     for b in datos_billeteras:
-        # Cálculo de rendimiento diario aproximado (Monto * TNA / 100 / 365 días)
         ganancia_diaria = (monto * (b["TNA"] / 100)) / 365
         ganancia_mensual = ganancia_diaria * 30
         resultados.append({
